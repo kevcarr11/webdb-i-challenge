@@ -41,4 +41,4 @@ FROM Customers;
 SELECT *
 FROM Suppliers
 GROUP BY SupplierName
-HAVING length(SupplierName) >= 20;
+HAVING length(SupplierName) > 20;

@@ -4,8 +4,13 @@ const db = require('../data/dbConfig');
 const router = express.Router()
 
 router.get("/", async (req, res, next) => {
+  const { limit, sortby, sortdir} = req.query
+  
   try {
-    res.json(await db("accounts").select())
+    res.json(await db("accounts")
+    .limit(limit)
+    .orderBy("id", "desc")
+    .select())
   } catch (err) {
     next(err)
   }
@@ -13,7 +18,9 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", validateAccountId, async (req, res, next) => {
   try {
-    const post = await db("accounts").where("id", req.params.id).first()
+    const post = await db("accounts")
+    .where("id", req.params.id)
+    .first()
     res.json(post)
   } catch (err) {
     next(err)
@@ -21,12 +28,17 @@ router.get("/:id", validateAccountId, async (req, res, next) => {
 })
 
 router.post("/", async (req, res, next) => {
+  const acctData = req.body
+  if (!acctData.name || !acctData.budget) {
+    return res.status(400).json({ errorMessage: "Please provide name and budget for the account." })
+  }
+
   try {
      const payload = {
        name: req.body.name,
        budget: req.body.budget
      }
-
+  
      const [id] = await db("accounts").insert(payload)
      res.json(await db("accounts").where("id", id).first())
   } catch (err) {
